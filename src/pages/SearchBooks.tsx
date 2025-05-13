@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import BookSearchBox from "@/components/BookSearchBox";
@@ -27,8 +26,10 @@ const SearchBooks = () => {
       const matchesAuthor = filters.author === "" || 
         book.author.toLowerCase().includes(filters.author.toLowerCase());
       
+      // Handle "all" as a special case for genre
       const matchesGenre = filters.genre === "" || 
-        book.genre.toLowerCase() === filters.genre.toLowerCase();
+                          filters.genre === "all" || 
+                          book.genre.toLowerCase() === filters.genre.toLowerCase();
       
       return matchesTitle && matchesAuthor && matchesGenre;
     });

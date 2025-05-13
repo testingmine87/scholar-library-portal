@@ -76,8 +76,13 @@ const BookSearchBox = ({ onSearch }: BookSearchBoxProps) => {
               <SelectValue placeholder="Select Genre" />
             </SelectTrigger>
             <SelectContent>
+              {/* Add an "All Genres" option with a non-empty value */}
+              <SelectItem value="all">All Genres</SelectItem>
               {genreOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem 
+                  key={option.value} 
+                  value={option.value || "unknown"} // Ensure no empty string values
+                >
                   {option.label}
                 </SelectItem>
               ))}
