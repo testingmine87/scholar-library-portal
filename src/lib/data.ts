@@ -120,11 +120,14 @@ export const bookCatalog = [
   }
 ];
 
+// Define the NotificationType to match the one in NotificationItem component
+export type NotificationType = "due_date" | "new_arrival" | "fine";
+
 // Notifications data
 export const notifications = [
   {
     id: "1",
-    type: "due_date",
+    type: "due_date" as NotificationType,
     title: "Book due soon",
     message: "\"The Design of Everyday Things\" is due in 3 days.",
     date: "2024-04-29",
@@ -132,7 +135,7 @@ export const notifications = [
   },
   {
     id: "2",
-    type: "new_arrival",
+    type: "new_arrival" as NotificationType,
     title: "New Arrival",
     message: "\"The Pragmatic Programmer\" is now available in the library.",
     date: "2024-04-28",
@@ -140,7 +143,7 @@ export const notifications = [
   },
   {
     id: "3",
-    type: "fine",
+    type: "fine" as NotificationType,
     title: "Fine Notice",
     message: "You have a $5.75 fine for \"Clean Code\".",
     date: "2024-04-25",
@@ -148,7 +151,7 @@ export const notifications = [
   },
   {
     id: "4",
-    type: "new_arrival",
+    type: "new_arrival" as NotificationType,
     title: "New Arrival",
     message: "\"Designing Data-Intensive Applications\" is now available.",
     date: "2024-04-20",

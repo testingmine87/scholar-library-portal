@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Calendar, BookOpen } from "lucide-react";
 
-type NotificationType = "due_date" | "new_arrival" | "fine";
+export type NotificationType = "due_date" | "new_arrival" | "fine";
 
 type NotificationItemProps = {
   id: string;

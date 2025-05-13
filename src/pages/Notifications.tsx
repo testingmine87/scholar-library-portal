@@ -2,7 +2,7 @@
 import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import { notifications as initialNotifications } from "@/lib/data";
-import NotificationItem from "@/components/NotificationItem";
+import NotificationItem, { NotificationType } from "@/components/NotificationItem";
 import { Button } from "@/components/ui/button";
 import { CheckCheck } from "lucide-react";
 import { toast } from "sonner";

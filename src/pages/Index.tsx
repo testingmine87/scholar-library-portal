@@ -5,7 +5,7 @@ import WelcomeBar from "@/components/WelcomeBar";
 import BorrowedBookCard from "@/components/BorrowedBookCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { borrowedBooks, notifications } from "@/lib/data";
-import NotificationItem from "@/components/NotificationItem";
+import NotificationItem, { NotificationType } from "@/components/NotificationItem";
 import { calculateDaysLeft } from "@/lib/dateUtils";
 import { BookOpen } from "lucide-react";
 
