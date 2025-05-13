@@ -16,9 +16,11 @@ const Profile = () => {
     queryKey: ['borrowedBooks'],
     queryFn: fetchBorrowedBooks,
     // Use local data as fallback if API call fails
-    onError: (err) => {
-      console.error('Error fetching borrowed books:', err);
-    },
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching borrowed books:', err);
+      }
+    }
   });
   
   // Use API data if available, otherwise fall back to local data

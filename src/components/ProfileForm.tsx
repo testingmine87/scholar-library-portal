@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ const ProfileForm = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   // Update form data when user data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setFormData({
         name: user.name,
