@@ -13,6 +13,7 @@ import DueDates from "./pages/DueDates";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -24,8 +25,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
   
+  // If no user is logged in, redirect to login page
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  
   // If user is a guest, they can only access the search page and dashboard
-  if (user?.role === 'guest' && window.location.pathname !== '/' && window.location.pathname !== '/search') {
+  if (user.role === 'guest' && window.location.pathname !== '/' && window.location.pathname !== '/search') {
     return <Navigate to="/" />;
   }
   
@@ -35,8 +41,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/search" element={<SearchBooks />} />
+      <Route path="/login" element={<Login />} />
+      <Route 
+        path="/" 
+        element={
+          <ProtectedRoute>
+            <Index />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/search" 
+        element={
+          <ProtectedRoute>
+            <SearchBooks />
+          </ProtectedRoute>
+        } 
+      />
       <Route 
         path="/borrowed" 
         element={

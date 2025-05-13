@@ -6,6 +6,17 @@ export const api = axios.create({
   baseURL: 'http://localhost:5000',
 });
 
+// Auth endpoints
+export const login = async (email: string, password: string, role: string) => {
+  try {
+    const response = await api.post('/auth/login', { email, password, role });
+    return response.data;
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  }
+};
+
 // API endpoints
 export const fetchUserProfile = async () => {
   try {
