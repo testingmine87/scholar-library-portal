@@ -1,8 +1,7 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { fetchUserProfile } from './api';
+// import { fetchUserProfile } from './api';
 
-export type UserRole = 'guest' | 'student' | 'faculty';
+export type UserRole = 'student' | 'librarian' | 'admin' | 'faculty' | 'guest';
 
 interface UserData {
   id: string;
@@ -24,6 +23,50 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Dummy user data for different roles
+const dummyUsers: Record<string, UserData> = {
+  'student@test.com': {
+    id: '1',
+    name: 'Alex Johnson',
+    email: 'student@test.com',
+    role: 'student',
+    department: 'Computer Science',
+    memberSince: 'September 2023'
+  },
+  'librarian@test.com': {
+    id: '2',
+    name: 'Sarah Wilson',
+    email: 'librarian@test.com',
+    role: 'librarian',
+    department: 'Library Services',
+    memberSince: 'January 2020'
+  },
+  'admin@test.com': {
+    id: '3',
+    name: 'Michael Brown',
+    email: 'admin@test.com',
+    role: 'admin',
+    department: 'Administration',
+    memberSince: 'March 2019'
+  },
+  'faculty@test.com': {
+    id: '4',
+    name: 'Dr. Emily Davis',
+    email: 'faculty@test.com',
+    role: 'faculty',
+    department: 'Mathematics',
+    memberSince: 'August 2018'
+  },
+  'guest@test.com': {
+    id: '5',
+    name: 'John Visitor',
+    email: 'guest@test.com',
+    role: 'guest',
+    department: 'Guest Access',
+    memberSince: 'December 2024'
+  }
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,12 +76,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const userData = await fetchUserProfile();
-      setUser(userData);
+      // TODO: Replace with actual API call when backend is ready
+      // const userData = await fetchUserProfile();
+      
+      // For now, keep user logged in if they exist in localStorage
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
     } catch (err) {
       console.error('Failed to load user data', err);
       setError('Failed to load user profile. Please try again later.');
-      // For demo purposes, we don't set a default user
       setUser(null);
     } finally {
       setLoading(false);
@@ -49,8 +97,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      // In a real app, we would send a request to the server
-      // For demo purposes, we'll simulate a successful login
+      // TODO: Replace with actual API call when backend is ready
+      /*
       const response = await fetch('http://localhost:5000/auth/login', {
         method: 'POST',
         headers: {
@@ -62,9 +110,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!response.ok) {
         throw new Error('Login failed');
       }
+      */
       
-      // After successful login, load the user profile
-      await loadUser();
+      // Dummy authentication logic
+      const dummyUser = dummyUsers[email];
+      if (dummyUser && password === 'password123' && dummyUser.role === role) {
+        setUser(dummyUser);
+        localStorage.setItem('currentUser', JSON.stringify(dummyUser));
+      } else {
+        throw new Error('Invalid credentials');
+      }
     } catch (err) {
       console.error('Login failed', err);
       setError('Login failed. Please check your credentials.');
@@ -80,12 +135,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     setUser(null);
-    // In a real app, we would clear tokens, cookies, etc.
+    localStorage.removeItem('currentUser');
   };
 
   useEffect(() => {
-    // On initial load, check if user is already logged in
-    // In a real app, we would check for tokens, cookies, etc.
     loadUser();
   }, []);
 

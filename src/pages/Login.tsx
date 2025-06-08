@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "@/lib/api";
+// import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,23 +18,24 @@ const Login = () => {
   const [role, setRole] = useState<UserRole>("student");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { refreshUser } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Call the API to login
+      // TODO: Replace with actual API call when backend is ready
+      /*
       const response = await api.post("/auth/login", {
         email,
         password,
         role
       });
+      */
 
-      // If successful, toast success and refresh user
+      await login(email, password, role);
       toast.success("Login successful!");
-      await refreshUser();
       navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
@@ -57,6 +58,11 @@ const Login = () => {
           <CardDescription className="text-center">
             Enter your credentials to access your account
           </CardDescription>
+          <div className="text-xs text-center text-gray-500 mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+            <strong>Demo Credentials:</strong><br/>
+            Email: student@test.com, librarian@test.com, admin@test.com, faculty@test.com, guest@test.com<br/>
+            Password: password123
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -71,6 +77,8 @@ const Login = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="librarian">Librarian</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="faculty">Faculty</SelectItem>
                   <SelectItem value="guest">Guest</SelectItem>
                 </SelectContent>
