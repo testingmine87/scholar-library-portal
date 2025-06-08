@@ -119,8 +119,13 @@ export const payFine = async (amount: number) => {
     return response.data;
     */
     
-    // Return dummy success response for now
-    return { success: true, orderId: 'dummy_order_123' };
+    // Return dummy success response with the expected structure for now
+    return { 
+      success: true, 
+      id: 'dummy_order_123',
+      amount: amount,
+      orderId: 'dummy_order_123' 
+    };
   } catch (error) {
     console.error('Error creating payment order:', error);
     throw error;
