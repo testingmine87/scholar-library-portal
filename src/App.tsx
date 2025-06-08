@@ -12,6 +12,8 @@ import BorrowedBooks from "./pages/BorrowedBooks";
 import DueDates from "./pages/DueDates";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
+import BookManagement from "./pages/BookManagement";
+import BorrowRequests from "./pages/BorrowRequests";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 
@@ -30,8 +32,20 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" />;
   }
   
-  // If user is a guest, they can only access the search page and dashboard
-  if (user.role === 'guest' && window.location.pathname !== '/' && window.location.pathname !== '/search') {
+  return <>{children}</>;
+};
+
+// Role-based route protection
+const RoleProtectedRoute = ({ 
+  children, 
+  allowedRoles 
+}: { 
+  children: React.ReactNode;
+  allowedRoles: string[];
+}) => {
+  const { user } = useAuth();
+  
+  if (!user || !allowedRoles.includes(user.role)) {
     return <Navigate to="/" />;
   }
   
@@ -62,7 +76,9 @@ const AppRoutes = () => {
         path="/borrowed" 
         element={
           <ProtectedRoute>
-            <BorrowedBooks />
+            <RoleProtectedRoute allowedRoles={['student', 'faculty']}>
+              <BorrowedBooks />
+            </RoleProtectedRoute>
           </ProtectedRoute>
         } 
       />
@@ -70,7 +86,9 @@ const AppRoutes = () => {
         path="/due-dates" 
         element={
           <ProtectedRoute>
-            <DueDates />
+            <RoleProtectedRoute allowedRoles={['student', 'faculty']}>
+              <DueDates />
+            </RoleProtectedRoute>
           </ProtectedRoute>
         } 
       />
@@ -86,7 +104,29 @@ const AppRoutes = () => {
         path="/notifications" 
         element={
           <ProtectedRoute>
-            <Notifications />
+            <RoleProtectedRoute allowedRoles={['student', 'faculty', 'librarian', 'admin']}>
+              <Notifications />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/book-management" 
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
+              <BookManagement />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/borrow-requests" 
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
+              <BorrowRequests />
+            </RoleProtectedRoute>
           </ProtectedRoute>
         } 
       />

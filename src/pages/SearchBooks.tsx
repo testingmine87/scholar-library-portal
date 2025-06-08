@@ -1,9 +1,14 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MainLayout from "@/components/MainLayout";
 import BookSearchBox from "@/components/BookSearchBox";
-import { bookCatalog } from "@/lib/data";
+import { fetchBooks, createBorrowRequest } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/AuthContext";
 
 type SearchFilters = {
   query: string;
@@ -11,15 +16,51 @@ type SearchFilters = {
   genre: string;
 };
 
+type Book = {
+  id: string;
+  title: string;
+  author: string;
+  genre: string;
+  totalQuantity: number;
+  availableQuantity: number;
+  available: boolean;
+  coverImage: string;
+};
+
 const SearchBooks = () => {
-  const [searchResults, setSearchResults] = useState(bookCatalog);
+  const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: books = [], isLoading } = useQuery({
+    queryKey: ['books'],
+    queryFn: fetchBooks,
+  });
+
+  const borrowRequestMutation = useMutation({
+    mutationFn: ({ bookId, bookTitle }: { bookId: string; bookTitle: string }) => 
+      createBorrowRequest(bookId, user?.id || '', user?.name || '', bookTitle),
+    onSuccess: () => {
+      toast.success("Borrow request submitted successfully!");
+      queryClient.invalidateQueries({ queryKey: ['borrow-requests'] });
+    },
+    onError: () => {
+      toast.error("Failed to submit borrow request. Please try again.");
+    }
+  });
+
+  useEffect(() => {
+    if (books.length > 0) {
+      setSearchResults(books);
+    }
+  }, [books]);
 
   const handleSearch = (filters: SearchFilters) => {
     setIsSearching(true);
     
     // Filter books based on search criteria
-    const results = bookCatalog.filter((book) => {
+    const results = books.filter((book) => {
       const matchesTitle = filters.query === "" || 
         book.title.toLowerCase().includes(filters.query.toLowerCase());
       
@@ -37,6 +78,40 @@ const SearchBooks = () => {
     setSearchResults(results);
     setIsSearching(false);
   };
+
+  const handleBorrowRequest = (book: Book) => {
+    if (!user) {
+      toast.error("Please log in to request books");
+      return;
+    }
+
+    if (user.role === 'guest') {
+      toast.error("Guests cannot borrow books");
+      return;
+    }
+
+    if (book.availableQuantity <= 0) {
+      toast.error("This book is currently not available");
+      return;
+    }
+
+    borrowRequestMutation.mutate({
+      bookId: book.id,
+      bookTitle: book.title
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center h-64">
+            <p>Loading books...</p>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -62,20 +137,38 @@ const SearchBooks = () => {
                         className="h-full w-full object-cover"
                       />
                     </div>
-                    <CardContent className="w-2/3 p-4">
-                      <h3 className="font-semibold line-clamp-2 mb-1">{book.title}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{book.author}</p>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-xs">
-                          {book.genre}
-                        </Badge>
-                        <Badge 
-                          variant={book.available ? "outline" : "secondary"}
-                          className={book.available ? "bg-green-50 text-green-700 border-green-100" : ""}
-                        >
-                          {book.available ? "Available" : "Checked Out"}
-                        </Badge>
+                    <CardContent className="w-2/3 p-4 flex flex-col justify-between">
+                      <div>
+                        <h3 className="font-semibold line-clamp-2 mb-1">{book.title}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{book.author}</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {book.genre}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs text-gray-500">
+                            Available: {book.availableQuantity}/{book.totalQuantity}
+                          </span>
+                          <Badge 
+                            variant={book.available ? "outline" : "secondary"}
+                            className={book.available ? "bg-green-50 text-green-700 border-green-100" : ""}
+                          >
+                            {book.available ? "Available" : "Out of Stock"}
+                          </Badge>
+                        </div>
                       </div>
+                      
+                      {user?.role !== 'guest' && user?.role !== 'librarian' && user?.role !== 'admin' && (
+                        <Button 
+                          size="sm" 
+                          className="w-full mt-2"
+                          disabled={!book.available || borrowRequestMutation.isPending}
+                          onClick={() => handleBorrowRequest(book)}
+                        >
+                          {borrowRequestMutation.isPending ? "Requesting..." : "Request to Borrow"}
+                        </Button>
+                      )}
                     </CardContent>
                   </div>
                 </Card>

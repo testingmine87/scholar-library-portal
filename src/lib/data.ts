@@ -52,13 +52,15 @@ export const borrowedBooks = [
   }
 ];
 
-// Book catalog data for search
+// Book catalog data with inventory management
 export const bookCatalog = [
   {
     id: "1",
     title: "Introduction to Algorithms",
     author: "Thomas H. Cormen",
     genre: "Computer Science",
+    totalQuantity: 3,
+    availableQuantity: 0,
     available: false,
     coverImage: "/placeholder.svg"
   },
@@ -67,6 +69,8 @@ export const bookCatalog = [
     title: "The Design of Everyday Things",
     author: "Don Norman",
     genre: "Design",
+    totalQuantity: 2,
+    availableQuantity: 0,
     available: false,
     coverImage: "/placeholder.svg"
   },
@@ -75,7 +79,9 @@ export const bookCatalog = [
     title: "Clean Code",
     author: "Robert C. Martin",
     genre: "Computer Science",
-    available: false,
+    totalQuantity: 4,
+    availableQuantity: 1,
+    available: true,
     coverImage: "/placeholder.svg"
   },
   {
@@ -83,7 +89,9 @@ export const bookCatalog = [
     title: "Thinking, Fast and Slow",
     author: "Daniel Kahneman",
     genre: "Psychology",
-    available: false,
+    totalQuantity: 2,
+    availableQuantity: 1,
+    available: true,
     coverImage: "/placeholder.svg"
   },
   {
@@ -91,6 +99,8 @@ export const bookCatalog = [
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
     genre: "Fiction",
+    totalQuantity: 5,
+    availableQuantity: 4,
     available: true,
     coverImage: "/placeholder.svg"
   },
@@ -99,6 +109,8 @@ export const bookCatalog = [
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
     genre: "Fiction",
+    totalQuantity: 3,
+    availableQuantity: 3,
     available: true,
     coverImage: "/placeholder.svg"
   },
@@ -107,6 +119,8 @@ export const bookCatalog = [
     title: "Physics for Scientists and Engineers",
     author: "Serway & Jewett",
     genre: "Physics",
+    totalQuantity: 2,
+    availableQuantity: 1,
     available: true,
     coverImage: "/placeholder.svg"
   },
@@ -115,6 +129,8 @@ export const bookCatalog = [
     title: "Calculus: Early Transcendentals",
     author: "James Stewart",
     genre: "Mathematics",
+    totalQuantity: 4,
+    availableQuantity: 4,
     available: true,
     coverImage: "/placeholder.svg"
   }

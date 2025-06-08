@@ -9,7 +9,9 @@ import {
   BellRing, 
   Menu, 
   X,
-  LogOut
+  LogOut,
+  Plus,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,14 +29,42 @@ const MainLayout = ({ children }: SidebarProps) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const navItems = [
+  // Base navigation items for all users
+  const baseNavItems = [
     { path: "/", label: "Dashboard", icon: <BookOpen className="h-5 w-5" /> },
     { path: "/search", label: "Search Books", icon: <Search className="h-5 w-5" /> },
+  ];
+
+  // Student/Faculty specific items
+  const userNavItems = [
     { path: "/borrowed", label: "Borrowed Books", icon: <BookOpen className="h-5 w-5" /> },
     { path: "/due-dates", label: "Due Dates", icon: <Calendar className="h-5 w-5" /> },
     { path: "/profile", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
     { path: "/notifications", label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
   ];
+
+  // Librarian/Admin specific items
+  const librarianNavItems = [
+    { path: "/book-management", label: "Manage Books", icon: <Plus className="h-5 w-5" /> },
+    { path: "/borrow-requests", label: "Borrow Requests", icon: <FileText className="h-5 w-5" /> },
+    { path: "/profile", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+    { path: "/notifications", label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
+  ];
+
+  // Determine navigation items based on user role
+  const getNavItems = () => {
+    if (!user) return baseNavItems;
+    
+    if (user.role === 'guest') {
+      return baseNavItems;
+    } else if (user.role === 'librarian' || user.role === 'admin') {
+      return [...baseNavItems, ...librarianNavItems];
+    } else {
+      return [...baseNavItems, ...userNavItems];
+    }
+  };
+
+  const navItems = getNavItems();
 
   const toggleMobileNav = () => {
     setIsMobileNavOpen(!isMobileNavOpen);
@@ -94,7 +124,7 @@ const MainLayout = ({ children }: SidebarProps) => {
             </div>
             <div>
               <p className="font-medium text-sm">{user?.name || 'Loading...'}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{user?.role || 'guest'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role || 'guest'}</p>
             </div>
           </div>
           
