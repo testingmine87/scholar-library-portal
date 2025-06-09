@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 // Create axios instance with base URL for our dummy API
@@ -62,8 +61,21 @@ const dummyNotifications = [
   }
 ];
 
-// Dummy borrow requests data
-let borrowRequests = [
+// Define the borrow request type with all possible statuses and optional reviewNote
+type BorrowRequest = {
+  id: string;
+  userId: string;
+  userName: string;
+  bookId: string;
+  bookTitle: string;
+  requestDate: string;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedBy: string;
+  reviewNote?: string;
+};
+
+// Dummy borrow requests data with proper typing
+let borrowRequests: BorrowRequest[] = [
   {
     id: "1",
     userId: "1",
@@ -71,7 +83,7 @@ let borrowRequests = [
     bookId: "5",
     bookTitle: "The Great Gatsby",
     requestDate: "2024-05-01",
-    status: "pending" as const,
+    status: "pending",
     requestedBy: "student@test.com"
   },
   {
@@ -81,7 +93,7 @@ let borrowRequests = [
     bookId: "7",
     bookTitle: "Physics for Scientists and Engineers",
     requestDate: "2024-04-30",
-    status: "approved" as const,
+    status: "approved",
     requestedBy: "faculty@test.com"
   }
 ];
@@ -314,14 +326,14 @@ export const createBorrowRequest = async (bookId: string, userId: string, userNa
     return response.data;
     */
     
-    const newRequest = {
+    const newRequest: BorrowRequest = {
       id: (borrowRequests.length + 1).toString(),
       userId,
       userName,
       bookId,
       bookTitle,
       requestDate: new Date().toISOString().split('T')[0],
-      status: "pending" as const,
+      status: "pending",
       requestedBy: `${userId}@test.com`
     };
     
