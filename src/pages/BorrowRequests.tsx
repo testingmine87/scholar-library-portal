@@ -9,19 +9,21 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, AlertCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type BorrowRequest = {
   id: string;
   userId: string;
   userName: string;
+  userRole: 'student' | 'faculty' | 'librarian' | 'admin' | 'guest';
   bookId: string;
   bookTitle: string;
   requestDate: string;
   status: 'pending' | 'approved' | 'rejected';
   requestedBy: string;
   reviewNote?: string;
+  dueAmount?: number;
 };
 
 const BorrowRequests = () => {
@@ -111,6 +113,22 @@ const BorrowRequests = () => {
     }
   };
 
+  const getRoleBadge = (role: string) => {
+    const colors = {
+      student: "bg-blue-50 text-blue-700 border-blue-200",
+      faculty: "bg-green-50 text-green-700 border-green-200",
+      guest: "bg-purple-50 text-purple-700 border-purple-200",
+      librarian: "bg-orange-50 text-orange-700 border-orange-200",
+      admin: "bg-red-50 text-red-700 border-red-200"
+    };
+    
+    return (
+      <Badge variant="outline" className={colors[role as keyof typeof colors] || "bg-gray-50 text-gray-700 border-gray-200"}>
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </Badge>
+    );
+  };
+
   if (isLoading) {
     return (
       <MainLayout>
@@ -152,9 +170,24 @@ const BorrowRequests = () => {
                   <CardContent>
                     <div className="space-y-3">
                       <div className="text-sm">
-                        <p><strong>Requested by:</strong> {request.userName}</p>
+                        <div className="flex items-center justify-between mb-1">
+                          <p><strong>Requested by:</strong> {request.userName}</p>
+                          {getRoleBadge(request.userRole)}
+                        </div>
                         <p><strong>Email:</strong> {request.requestedBy}</p>
                         <p><strong>Date:</strong> {new Date(request.requestDate).toLocaleDateString()}</p>
+                        
+                        {/* Show due amount for students */}
+                        {request.userRole === 'student' && request.dueAmount !== undefined && (
+                          <div className={`mt-2 p-2 rounded ${request.dueAmount > 0 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                            <div className="flex items-center gap-1">
+                              {request.dueAmount > 0 && <AlertCircle className="h-3 w-3" />}
+                              <p className="text-xs font-medium">
+                                Current Due: ₹{request.dueAmount.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex space-x-2">
@@ -227,7 +260,10 @@ const BorrowRequests = () => {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="text-sm">
-                        <p><strong>Requested by:</strong> {request.userName}</p>
+                        <div className="flex items-center justify-between mb-1">
+                          <p><strong>Requested by:</strong> {request.userName}</p>
+                          {getRoleBadge(request.userRole)}
+                        </div>
                         <p><strong>Date:</strong> {new Date(request.requestDate).toLocaleDateString()}</p>
                       </div>
                       {request.reviewNote && (
@@ -260,8 +296,25 @@ const BorrowRequests = () => {
               <div className="space-y-4">
                 <div className="bg-gray-50 p-3 rounded">
                   <h4 className="font-medium">{selectedRequest.bookTitle}</h4>
-                  <p className="text-sm text-gray-600">Requested by: {selectedRequest.userName}</p>
+                  <div className="flex items-center justify-between mt-1">
+                    <p className="text-sm text-gray-600">Requested by: {selectedRequest.userName}</p>
+                    {getRoleBadge(selectedRequest.userRole)}
+                  </div>
                   <p className="text-sm text-gray-600">Date: {new Date(selectedRequest.requestDate).toLocaleDateString()}</p>
+                  
+                  {selectedRequest.userRole === 'student' && selectedRequest.dueAmount !== undefined && (
+                    <div className={`mt-2 p-2 rounded ${selectedRequest.dueAmount > 0 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+                      <div className="flex items-center gap-1">
+                        {selectedRequest.dueAmount > 0 && <AlertCircle className="h-4 w-4" />}
+                        <p className="text-sm font-medium">
+                          Current Due Amount: ₹{selectedRequest.dueAmount.toFixed(2)}
+                        </p>
+                      </div>
+                      {selectedRequest.dueAmount > 0 && (
+                        <p className="text-xs mt-1">Student has outstanding fines that should be cleared.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div>

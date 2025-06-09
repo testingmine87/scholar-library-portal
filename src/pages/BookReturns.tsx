@@ -14,6 +14,7 @@ type BorrowedBookForReturn = {
   id: string;
   userId: string;
   userName: string;
+  userRole: 'student' | 'faculty' | 'librarian' | 'admin' | 'guest';
   bookId: string;
   bookTitle: string;
   isbn: string;
@@ -35,7 +36,7 @@ const BookReturns = () => {
   const returnBookMutation = useMutation({
     mutationFn: returnBook,
     onSuccess: (returnedBook) => {
-      if (returnedBook.fine > 0) {
+      if (returnedBook.userRole === 'student' && returnedBook.fine > 0) {
         toast.success(`Book returned successfully! Fine: ₹${returnedBook.fine.toFixed(2)}`);
       } else {
         toast.success("Book returned successfully!");
@@ -54,9 +55,21 @@ const BookReturns = () => {
     }
   };
 
-  const getStatusBadge = (returnDate: string) => {
+  const getStatusBadge = (returnDate: string, userRole: string) => {
     const daysLeft = calculateDaysLeft(returnDate);
     
+    // Faculty and guests don't have overdue concept
+    if (userRole === 'faculty' || userRole === 'guest') {
+      if (daysLeft < 0) {
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Extended Access</Badge>;
+      } else if (daysLeft <= 3) {
+        return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">Due Soon ({daysLeft} days)</Badge>;
+      } else {
+        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">{daysLeft} days left</Badge>;
+      }
+    }
+    
+    // Students have overdue fines
     if (daysLeft < 0) {
       return (
         <Badge variant="destructive">
@@ -72,7 +85,10 @@ const BookReturns = () => {
     }
   };
 
-  const calculatePotentialFine = (returnDate: string): number => {
+  const calculatePotentialFine = (returnDate: string, userRole: string): number => {
+    // Only students get fines
+    if (userRole !== 'student') return 0;
+    
     const today = new Date();
     const dueDate = new Date(returnDate);
     
@@ -81,6 +97,22 @@ const BookReturns = () => {
       return daysLate * 2; // ₹2 per day
     }
     return 0;
+  };
+
+  const getRoleBadge = (role: string) => {
+    const colors = {
+      student: "bg-blue-50 text-blue-700 border-blue-200",
+      faculty: "bg-green-50 text-green-700 border-green-200",
+      guest: "bg-purple-50 text-purple-700 border-purple-200",
+      librarian: "bg-orange-50 text-orange-700 border-orange-200",
+      admin: "bg-red-50 text-red-700 border-red-200"
+    };
+    
+    return (
+      <Badge variant="outline" className={colors[role as keyof typeof colors] || "bg-gray-50 text-gray-700 border-gray-200"}>
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </Badge>
+    );
   };
 
   if (isLoading) {
@@ -129,6 +161,7 @@ const BookReturns = () => {
                   <TableRow>
                     <TableHead>Book Details</TableHead>
                     <TableHead>Borrower</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead>Issue Date</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Status</TableHead>
@@ -138,7 +171,7 @@ const BookReturns = () => {
                 </TableHeader>
                 <TableBody>
                   {borrowedBooks.map((book: BorrowedBookForReturn) => {
-                    const potentialFine = calculatePotentialFine(book.returnDate);
+                    const potentialFine = calculatePotentialFine(book.returnDate, book.userRole);
                     
                     return (
                       <TableRow key={book.id}>
@@ -155,6 +188,9 @@ const BookReturns = () => {
                           </div>
                         </TableCell>
                         <TableCell>
+                          {getRoleBadge(book.userRole)}
+                        </TableCell>
+                        <TableCell>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             {formatDate(book.issueDate)}
@@ -167,15 +203,19 @@ const BookReturns = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          {getStatusBadge(book.returnDate)}
+                          {getStatusBadge(book.returnDate, book.userRole)}
                         </TableCell>
                         <TableCell>
-                          {potentialFine > 0 ? (
-                            <span className="text-red-600 font-medium">
-                              ₹{potentialFine.toFixed(2)}
-                            </span>
+                          {book.userRole === 'student' ? (
+                            potentialFine > 0 ? (
+                              <span className="text-red-600 font-medium">
+                                ₹{potentialFine.toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="text-green-600">₹0.00</span>
+                            )
                           ) : (
-                            <span className="text-green-600">₹0.00</span>
+                            <span className="text-gray-500">N/A</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -204,11 +244,12 @@ const BookReturns = () => {
             <CardTitle className="text-lg">Fine Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
-              • Late return fine: ₹2.00 per day after due date
-              • Fines are calculated automatically when books are returned
-              • Students with outstanding fines may have their borrowing privileges suspended
-            </p>
+            <div className="space-y-2 text-sm text-gray-600">
+              <p>• <strong>Students:</strong> Late return fine of ₹2.00 per day after due date</p>
+              <p>• <strong>Faculty & Guests:</strong> No late fines, extended access privileges</p>
+              <p>• Fines are calculated automatically when books are returned</p>
+              <p>• Students with outstanding fines may have their borrowing privileges suspended</p>
+            </div>
           </CardContent>
         </Card>
       </div>

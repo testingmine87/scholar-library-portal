@@ -3,6 +3,7 @@ import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
 import WelcomeBar from "@/components/WelcomeBar";
 import BorrowedBookCard from "@/components/BorrowedBookCard";
+import LMSInfo from "@/components/LMSInfo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { borrowedBooks, notifications } from "@/lib/data";
 import NotificationItem, { NotificationType } from "@/components/NotificationItem";
@@ -31,7 +32,10 @@ const Index = () => {
       <div className="container mx-auto px-4 py-6">
         <WelcomeBar />
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {/* LMS Information Section */}
+        <LMSInfo />
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recently Borrowed Books */}
           <div className="lg:col-span-2">
             <Card>

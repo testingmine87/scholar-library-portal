@@ -69,12 +69,14 @@ type BorrowRequest = {
   id: string;
   userId: string;
   userName: string;
+  userRole: 'student' | 'faculty' | 'librarian' | 'admin' | 'guest';
   bookId: string;
   bookTitle: string;
   requestDate: string;
   status: 'pending' | 'approved' | 'rejected';
   requestedBy: string;
   reviewNote?: string;
+  dueAmount?: number; // Add due amount for students
 };
 
 // User type for management
@@ -95,11 +97,12 @@ type Genre = {
   description?: string;
 };
 
-// Borrowed book for return management
+// Borrowed book for return management with user role
 type BorrowedBookForReturn = {
   id: string;
   userId: string;
   userName: string;
+  userRole: 'student' | 'faculty' | 'librarian' | 'admin' | 'guest';
   bookId: string;
   bookTitle: string;
   isbn: string;
@@ -110,22 +113,25 @@ type BorrowedBookForReturn = {
   returned: boolean;
 };
 
-// Dummy borrow requests data with proper typing
+// Dummy borrow requests data with proper typing including user roles
 let borrowRequests: BorrowRequest[] = [
   {
     id: "1",
     userId: "1",
     userName: "Alex Johnson",
+    userRole: "student",
     bookId: "5",
     bookTitle: "The Great Gatsby",
     requestDate: "2024-05-01",
     status: "pending",
-    requestedBy: "student@test.com"
+    requestedBy: "student@test.com",
+    dueAmount: 4.50 // Student has existing due amount
   },
   {
     id: "2",
     userId: "4",
     userName: "Dr. Emily Davis",
+    userRole: "faculty",
     bookId: "7",
     bookTitle: "Physics for Scientists and Engineers",
     requestDate: "2024-04-30",
@@ -198,12 +204,13 @@ let genres: Genre[] = [
   { id: "6", name: "Mathematics", description: "Mathematics and computational theory" }
 ];
 
-// Dummy borrowed books for return management
+// Dummy borrowed books for return management with user roles
 let borrowedBooksForReturn: BorrowedBookForReturn[] = [
   {
     id: "1",
     userId: "1",
     userName: "Alex Johnson",
+    userRole: "student",
     bookId: "1",
     bookTitle: "Introduction to Algorithms",
     isbn: "978-0262033848",
@@ -216,6 +223,7 @@ let borrowedBooksForReturn: BorrowedBookForReturn[] = [
     id: "2",
     userId: "1",
     userName: "Alex Johnson",
+    userRole: "student",
     bookId: "2",
     bookTitle: "The Design of Everyday Things", 
     isbn: "978-0465050659",
@@ -228,11 +236,25 @@ let borrowedBooksForReturn: BorrowedBookForReturn[] = [
     id: "3",
     userId: "6",
     userName: "Jane Smith",
+    userRole: "student",
     bookId: "3",
     bookTitle: "Clean Code",
     isbn: "978-0132350884",
     issueDate: "2024-04-20",
     returnDate: "2024-05-20",
+    fine: 0,
+    returned: false
+  },
+  {
+    id: "4",
+    userId: "4",
+    userName: "Dr. Emily Davis",
+    userRole: "faculty",
+    bookId: "4",
+    bookTitle: "Thinking, Fast and Slow",
+    isbn: "978-0374533557",
+    issueDate: "2024-04-10",
+    returnDate: "2024-05-10",
     fine: 0,
     returned: false
   }
@@ -456,23 +478,34 @@ export const updateBookQuantity = async (bookId: string, newQuantity: number) =>
 };
 
 // Borrow request APIs
-export const createBorrowRequest = async (bookId: string, userId: string, userName: string, bookTitle: string) => {
+export const createBorrowRequest = async (bookId: string, userId: string, userName: string, bookTitle: string, userRole: string) => {
   try {
-    // TODO: Uncomment when backend is ready
-    /*
-    const response = await api.post('/borrow-requests', { bookId, userId });
-    return response.data;
-    */
+    // Get user's existing due amount if they are a student
+    let dueAmount = 0;
+    if (userRole === 'student') {
+      const userBorrowedBooks = borrowedBooksForReturn.filter(book => book.userId === userId && !book.returned);
+      dueAmount = userBorrowedBooks.reduce((total, book) => {
+        const today = new Date();
+        const returnDate = new Date(book.returnDate);
+        if (today > returnDate) {
+          const daysLate = Math.ceil((today.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
+          return total + (daysLate * 2);
+        }
+        return total;
+      }, 0);
+    }
     
     const newRequest: BorrowRequest = {
       id: (borrowRequests.length + 1).toString(),
       userId,
       userName,
+      userRole: userRole as any,
       bookId,
       bookTitle,
       requestDate: new Date().toISOString().split('T')[0],
       status: "pending",
-      requestedBy: `${userId}@test.com`
+      requestedBy: `${userId}@test.com`,
+      dueAmount: userRole === 'student' ? dueAmount : undefined
     };
     
     borrowRequests.push(newRequest);
@@ -632,9 +665,9 @@ export const returnBook = async (borrowId: string) => {
       const today = new Date();
       const returnDate = new Date(borrow.returnDate);
       
-      // Calculate fine if returned late (₹2 per day)
+      // Calculate fine only for students (₹2 per day)
       let fine = 0;
-      if (today > returnDate) {
+      if (borrow.userRole === 'student' && today > returnDate) {
         const daysLate = Math.ceil((today.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
         fine = daysLate * 2;
       }
@@ -657,6 +690,45 @@ export const returnBook = async (borrowId: string) => {
     throw new Error('Borrowed book not found');
   } catch (error) {
     console.error('Error returning book:', error);
+    throw error;
+  }
+};
+
+// Forgot password API
+export const sendPasswordResetOTP = async (email: string) => {
+  try {
+    // TODO: Uncomment when backend is ready
+    /*
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+    */
+    
+    // Simulate sending OTP
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return { success: true, message: 'OTP sent to your email' };
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    throw error;
+  }
+};
+
+export const verifyOTPAndResetPassword = async (email: string, otp: string, newPassword: string) => {
+  try {
+    // TODO: Uncomment when backend is ready
+    /*
+    const response = await api.post('/auth/reset-password', { email, otp, newPassword });
+    return response.data;
+    */
+    
+    // Simulate password reset
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (otp === '123456') { // Dummy OTP for testing
+      return { success: true, message: 'Password reset successfully' };
+    } else {
+      throw new Error('Invalid OTP');
+    }
+  } catch (error) {
+    console.error('Error resetting password:', error);
     throw error;
   }
 };
