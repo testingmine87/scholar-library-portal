@@ -34,14 +34,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <BookOpen className="h-8 w-8 text-blue-600" />
           </div>
           <CardTitle className="text-2xl font-bold">Library Management System</CardTitle>
-          <p className="text-gray-600">Sign in to access your account</p>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to access your account</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,16 +99,19 @@ const Login = () => {
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
             
-            <div className="text-center">
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+            <div className="flex justify-between text-sm">
+              <Link to="/forgot-password" className="text-blue-600 hover:underline">
                 Forgot your password?
+              </Link>
+              <Link to="/signup" className="text-blue-600 hover:underline">
+                Create account
               </Link>
             </div>
           </form>
           
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">Demo Credentials:</p>
-            <div className="text-xs space-y-1">
+          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Demo Credentials:</p>
+            <div className="text-xs space-y-1 text-gray-500 dark:text-gray-500">
               <p><strong>Student:</strong> student@test.com</p>
               <p><strong>Faculty:</strong> faculty@test.com</p>
               <p><strong>Librarian:</strong> librarian@test.com</p>

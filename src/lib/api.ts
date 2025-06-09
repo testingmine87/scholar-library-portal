@@ -79,7 +79,7 @@ type BorrowRequest = {
   dueAmount?: number; // Add due amount for students
 };
 
-// User type for management
+// Updated User type with isActive field
 type User = {
   id: string;
   name: string;
@@ -88,6 +88,8 @@ type User = {
   department: string;
   memberSince: string;
   studentId?: string;
+  isActive: boolean;
+  inactiveRemark?: string;
 };
 
 // Genre type
@@ -140,7 +142,7 @@ let borrowRequests: BorrowRequest[] = [
   }
 ];
 
-// Dummy users data for management
+// Updated dummy users data for management with isActive field
 let allUsers: User[] = [
   {
     id: "1",
@@ -149,7 +151,8 @@ let allUsers: User[] = [
     role: "student",
     department: "Computer Science",
     memberSince: "September 2023",
-    studentId: "CS2023001"
+    studentId: "CS2023001",
+    isActive: true
   },
   {
     id: "2",
@@ -157,7 +160,8 @@ let allUsers: User[] = [
     email: "librarian@test.com",
     role: "librarian",
     department: "Library Services",
-    memberSince: "January 2020"
+    memberSince: "January 2020",
+    isActive: true
   },
   {
     id: "3",
@@ -165,7 +169,8 @@ let allUsers: User[] = [
     email: "admin@test.com",
     role: "admin",
     department: "Administration",
-    memberSince: "March 2019"
+    memberSince: "March 2019",
+    isActive: true
   },
   {
     id: "4",
@@ -173,7 +178,8 @@ let allUsers: User[] = [
     email: "faculty@test.com",
     role: "faculty",
     department: "Mathematics",
-    memberSince: "August 2018"
+    memberSince: "August 2018",
+    isActive: true
   },
   {
     id: "5",
@@ -181,7 +187,8 @@ let allUsers: User[] = [
     email: "guest@test.com",
     role: "guest",
     department: "Guest Access",
-    memberSince: "December 2024"
+    memberSince: "December 2024",
+    isActive: true
   },
   {
     id: "6",
@@ -190,7 +197,8 @@ let allUsers: User[] = [
     role: "student",
     department: "Physics",
     memberSince: "September 2023",
-    studentId: "PH2023002"
+    studentId: "PH2023002",
+    isActive: true
   }
 ];
 
@@ -589,6 +597,58 @@ export const updateUserProfile = async (userId: string, userData: Partial<User>)
     throw new Error('User not found');
   } catch (error) {
     console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+export const createUser = async (userData: {
+  name: string;
+  email: string;
+  role: 'student' | 'faculty' | 'guest';
+  department: string;
+  studentId?: string;
+}) => {
+  try {
+    // Check if user already exists
+    const existingUser = allUsers.find(user => user.email === userData.email);
+    if (existingUser) {
+      throw new Error('User with this email already exists');
+    }
+
+    const newUser: User = {
+      id: (allUsers.length + 1).toString(),
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      department: userData.department,
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      studentId: userData.studentId,
+      isActive: true
+    };
+    
+    allUsers.push(newUser);
+    return newUser;
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
+};
+
+export const toggleUserActiveStatus = async (userId: string, isActive: boolean, remark?: string) => {
+  try {
+    const userIndex = allUsers.findIndex(user => user.id === userId);
+    if (userIndex !== -1) {
+      allUsers[userIndex].isActive = isActive;
+      if (!isActive && remark) {
+        allUsers[userIndex].inactiveRemark = remark;
+      } else if (isActive) {
+        delete allUsers[userIndex].inactiveRemark;
+      }
+      return allUsers[userIndex];
+    }
+    throw new Error('User not found');
+  } catch (error) {
+    console.error('Error updating user status:', error);
     throw error;
   }
 };

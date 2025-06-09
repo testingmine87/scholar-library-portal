@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export type UserRole = 'student' | 'librarian' | 'admin' | 'faculty' | 'guest';
@@ -10,6 +11,8 @@ interface UserData {
   department: string;
   memberSince: string;
   studentId?: string;
+  isActive: boolean;
+  inactiveRemark?: string;
 }
 
 interface AuthContextType {
@@ -19,11 +22,19 @@ interface AuthContextType {
   logout: () => void;
   refreshUser: () => Promise<void>;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
+  signup: (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    department: string;
+    studentId?: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Dummy user data for different roles
+// Updated dummy user data with isActive field
 const dummyUsers: Record<string, UserData> = {
   'student@test.com': {
     id: '1',
@@ -32,7 +43,8 @@ const dummyUsers: Record<string, UserData> = {
     role: 'student',
     department: 'Computer Science',
     memberSince: 'September 2023',
-    studentId: 'CS2023001'
+    studentId: 'CS2023001',
+    isActive: true
   },
   'librarian@test.com': {
     id: '2',
@@ -40,7 +52,8 @@ const dummyUsers: Record<string, UserData> = {
     email: 'librarian@test.com',
     role: 'librarian',
     department: 'Library Services',
-    memberSince: 'January 2020'
+    memberSince: 'January 2020',
+    isActive: true
   },
   'admin@test.com': {
     id: '3',
@@ -48,7 +61,8 @@ const dummyUsers: Record<string, UserData> = {
     email: 'admin@test.com',
     role: 'admin',
     department: 'Administration',
-    memberSince: 'March 2019'
+    memberSince: 'March 2019',
+    isActive: true
   },
   'faculty@test.com': {
     id: '4',
@@ -56,7 +70,8 @@ const dummyUsers: Record<string, UserData> = {
     email: 'faculty@test.com',
     role: 'faculty',
     department: 'Mathematics',
-    memberSince: 'August 2018'
+    memberSince: 'August 2018',
+    isActive: true
   },
   'guest@test.com': {
     id: '5',
@@ -64,7 +79,8 @@ const dummyUsers: Record<string, UserData> = {
     email: 'guest@test.com',
     role: 'guest',
     department: 'Guest Access',
-    memberSince: 'December 2024'
+    memberSince: 'December 2024',
+    isActive: true
   }
 };
 
@@ -77,13 +93,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const userData = await fetchUserProfile();
-      
-      // For now, keep user logged in if they exist in localStorage
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
-        setUser(JSON.parse(savedUser));
+        const userData = JSON.parse(savedUser);
+        // Check if user is active
+        if (!userData.isActive) {
+          setError('Your account has been deactivated. Please contact administration.');
+          setUser(null);
+          localStorage.removeItem('currentUser');
+        } else {
+          setUser(userData);
+        }
       }
     } catch (err) {
       console.error('Failed to load user data', err);
@@ -98,24 +118,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      // TODO: Replace with actual API call when backend is ready
-      /*
-      const response = await fetch('http://localhost:5000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, role }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-      */
-      
-      // Dummy authentication logic
       const dummyUser = dummyUsers[email];
       if (dummyUser && password === 'password123' && dummyUser.role === role) {
+        if (!dummyUser.isActive) {
+          throw new Error('Your account has been deactivated. Please contact administration.');
+        }
         setUser(dummyUser);
         localStorage.setItem('currentUser', JSON.stringify(dummyUser));
       } else {
@@ -123,7 +130,53 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     } catch (err) {
       console.error('Login failed', err);
-      setError('Login failed. Please check your credentials.');
+      setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    department: string;
+    studentId?: string;
+  }) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Check if user already exists
+      if (dummyUsers[userData.email]) {
+        throw new Error('User with this email already exists');
+      }
+
+      // Don't allow admin signup
+      if (userData.role === 'admin') {
+        throw new Error('Admin accounts cannot be created through signup');
+      }
+
+      const newUser: UserData = {
+        id: (Object.keys(dummyUsers).length + 1).toString(),
+        name: userData.name,
+        email: userData.email,
+        role: userData.role,
+        department: userData.department,
+        memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        studentId: userData.studentId,
+        isActive: true
+      };
+
+      // Add to dummy users
+      dummyUsers[userData.email] = newUser;
+      
+      setUser(newUser);
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+    } catch (err) {
+      console.error('Signup failed', err);
+      setError(err instanceof Error ? err.message : 'Signup failed. Please try again.');
       throw err;
     } finally {
       setLoading(false);
@@ -144,7 +197,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, logout, refreshUser, login }}>
+    <AuthContext.Provider value={{ user, loading, error, logout, refreshUser, login, signup }}>
       {children}
     </AuthContext.Provider>
   );
