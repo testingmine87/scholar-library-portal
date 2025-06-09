@@ -26,7 +26,8 @@ const dummyUserProfile = {
   email: "alex.johnson@university.edu",
   role: "student",
   department: "Computer Science",
-  memberSince: "September 2023"
+  memberSince: "September 2023",
+  studentId: "CS2023001"
 };
 
 const dummyBorrowedBooks = [
@@ -37,7 +38,8 @@ const dummyBorrowedBooks = [
     issueDate: "2024-04-15",
     returnDate: "2024-05-15",
     fine: 0,
-    coverImage: "/placeholder.svg"
+    coverImage: "/placeholder.svg",
+    isbn: "978-0262033848"
   },
   {
     id: "2",
@@ -46,7 +48,8 @@ const dummyBorrowedBooks = [
     issueDate: "2024-04-02",
     returnDate: "2024-05-02",
     fine: 2.50,
-    coverImage: "/placeholder.svg"
+    coverImage: "/placeholder.svg",
+    isbn: "978-0465050659"
   }
 ];
 
@@ -74,6 +77,39 @@ type BorrowRequest = {
   reviewNote?: string;
 };
 
+// User type for management
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'student' | 'faculty' | 'librarian' | 'admin' | 'guest';
+  department: string;
+  memberSince: string;
+  studentId?: string;
+};
+
+// Genre type
+type Genre = {
+  id: string;
+  name: string;
+  description?: string;
+};
+
+// Borrowed book for return management
+type BorrowedBookForReturn = {
+  id: string;
+  userId: string;
+  userName: string;
+  bookId: string;
+  bookTitle: string;
+  isbn: string;
+  issueDate: string;
+  returnDate: string;
+  actualReturnDate?: string;
+  fine: number;
+  returned: boolean;
+};
+
 // Dummy borrow requests data with proper typing
 let borrowRequests: BorrowRequest[] = [
   {
@@ -98,13 +134,118 @@ let borrowRequests: BorrowRequest[] = [
   }
 ];
 
-// Dummy books catalog with quantities
+// Dummy users data for management
+let allUsers: User[] = [
+  {
+    id: "1",
+    name: "Alex Johnson",
+    email: "student@test.com",
+    role: "student",
+    department: "Computer Science",
+    memberSince: "September 2023",
+    studentId: "CS2023001"
+  },
+  {
+    id: "2",
+    name: "Sarah Wilson",
+    email: "librarian@test.com",
+    role: "librarian",
+    department: "Library Services",
+    memberSince: "January 2020"
+  },
+  {
+    id: "3",
+    name: "Michael Brown",
+    email: "admin@test.com",
+    role: "admin",
+    department: "Administration",
+    memberSince: "March 2019"
+  },
+  {
+    id: "4",
+    name: "Dr. Emily Davis",
+    email: "faculty@test.com",
+    role: "faculty",
+    department: "Mathematics",
+    memberSince: "August 2018"
+  },
+  {
+    id: "5",
+    name: "John Visitor",
+    email: "guest@test.com",
+    role: "guest",
+    department: "Guest Access",
+    memberSince: "December 2024"
+  },
+  {
+    id: "6",
+    name: "Jane Smith",
+    email: "jane.smith@university.edu",
+    role: "student",
+    department: "Physics",
+    memberSince: "September 2023",
+    studentId: "PH2023002"
+  }
+];
+
+// Dummy genres data
+let genres: Genre[] = [
+  { id: "1", name: "Computer Science", description: "Books related to computing and programming" },
+  { id: "2", name: "Design", description: "Design and user experience books" },
+  { id: "3", name: "Psychology", description: "Psychology and behavioral science" },
+  { id: "4", name: "Fiction", description: "Fictional literature and novels" },
+  { id: "5", name: "Physics", description: "Physics and related sciences" },
+  { id: "6", name: "Mathematics", description: "Mathematics and computational theory" }
+];
+
+// Dummy borrowed books for return management
+let borrowedBooksForReturn: BorrowedBookForReturn[] = [
+  {
+    id: "1",
+    userId: "1",
+    userName: "Alex Johnson",
+    bookId: "1",
+    bookTitle: "Introduction to Algorithms",
+    isbn: "978-0262033848",
+    issueDate: "2024-04-15",
+    returnDate: "2024-05-15",
+    fine: 0,
+    returned: false
+  },
+  {
+    id: "2",
+    userId: "1",
+    userName: "Alex Johnson",
+    bookId: "2",
+    bookTitle: "The Design of Everyday Things", 
+    isbn: "978-0465050659",
+    issueDate: "2024-04-02",
+    returnDate: "2024-05-02",
+    fine: 2.50,
+    returned: false
+  },
+  {
+    id: "3",
+    userId: "6",
+    userName: "Jane Smith",
+    bookId: "3",
+    bookTitle: "Clean Code",
+    isbn: "978-0132350884",
+    issueDate: "2024-04-20",
+    returnDate: "2024-05-20",
+    fine: 0,
+    returned: false
+  }
+];
+
+// Dummy books catalog with quantities and ISBN
 let booksInventory = [
   {
     id: "1",
     title: "Introduction to Algorithms",
     author: "Thomas H. Cormen",
     genre: "Computer Science",
+    isbn: "978-0262033848",
     totalQuantity: 3,
     availableQuantity: 0,
     coverImage: "/placeholder.svg"
@@ -114,6 +255,7 @@ let booksInventory = [
     title: "The Design of Everyday Things",
     author: "Don Norman",
     genre: "Design",
+    isbn: "978-0465050659",
     totalQuantity: 2,
     availableQuantity: 0,
     coverImage: "/placeholder.svg"
@@ -123,6 +265,7 @@ let booksInventory = [
     title: "Clean Code",
     author: "Robert C. Martin",
     genre: "Computer Science",
+    isbn: "978-0132350884",
     totalQuantity: 4,
     availableQuantity: 1,
     coverImage: "/placeholder.svg"
@@ -132,6 +275,7 @@ let booksInventory = [
     title: "Thinking, Fast and Slow",
     author: "Daniel Kahneman",
     genre: "Psychology",
+    isbn: "978-0374533557",
     totalQuantity: 2,
     availableQuantity: 1,
     coverImage: "/placeholder.svg"
@@ -141,6 +285,7 @@ let booksInventory = [
     title: "The Great Gatsby",
     author: "F. Scott Fitzgerald",
     genre: "Fiction",
+    isbn: "978-0743273565",
     totalQuantity: 5,
     availableQuantity: 4,
     coverImage: "/placeholder.svg"
@@ -150,6 +295,7 @@ let booksInventory = [
     title: "To Kill a Mockingbird",
     author: "Harper Lee",
     genre: "Fiction",
+    isbn: "978-0061120084",
     totalQuantity: 3,
     availableQuantity: 3,
     coverImage: "/placeholder.svg"
@@ -159,6 +305,7 @@ let booksInventory = [
     title: "Physics for Scientists and Engineers",
     author: "Serway & Jewett",
     genre: "Physics",
+    isbn: "978-1133947271",
     totalQuantity: 2,
     availableQuantity: 1,
     coverImage: "/placeholder.svg"
@@ -168,6 +315,7 @@ let booksInventory = [
     title: "Calculus: Early Transcendentals",
     author: "James Stewart",
     genre: "Mathematics",
+    isbn: "978-1285741550",
     totalQuantity: 4,
     availableQuantity: 4,
     coverImage: "/placeholder.svg"
@@ -247,12 +395,6 @@ export const payFine = async (amount: number) => {
 // Books management APIs
 export const fetchBooks = async () => {
   try {
-    // TODO: Uncomment when backend is ready
-    /*
-    const response = await api.get('/books');
-    return response.data;
-    */
-    
     return booksInventory.map(book => ({
       ...book,
       available: book.availableQuantity > 0
@@ -267,20 +409,16 @@ export const addBook = async (bookData: {
   title: string;
   author: string;
   genre: string;
+  isbn: string;
   quantity: number;
 }) => {
   try {
-    // TODO: Uncomment when backend is ready
-    /*
-    const response = await api.post('/books', bookData);
-    return response.data;
-    */
-    
     const newBook = {
       id: (booksInventory.length + 1).toString(),
       title: bookData.title,
       author: bookData.author,
       genre: bookData.genre,
+      isbn: bookData.isbn,
       totalQuantity: bookData.quantity,
       availableQuantity: bookData.quantity,
       coverImage: "/placeholder.svg"
@@ -389,6 +527,136 @@ export const updateBorrowRequestStatus = async (requestId: string, status: 'appr
     throw new Error('Request not found');
   } catch (error) {
     console.error('Error updating borrow request:', error);
+    throw error;
+  }
+};
+
+// User management APIs
+export const fetchUsers = async (userRole?: string) => {
+  try {
+    if (userRole === 'librarian') {
+      // Librarians can only see students and guests
+      return allUsers.filter(user => ['student', 'guest', 'faculty'].includes(user.role));
+    }
+    // Admins can see all users
+    return allUsers;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
+
+export const updateUserProfile = async (userId: string, userData: Partial<User>) => {
+  try {
+    const userIndex = allUsers.findIndex(user => user.id === userId);
+    if (userIndex !== -1) {
+      allUsers[userIndex] = { ...allUsers[userIndex], ...userData };
+      return allUsers[userIndex];
+    }
+    throw new Error('User not found');
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
+};
+
+// Genre management APIs
+export const fetchGenres = async () => {
+  try {
+    return genres;
+  } catch (error) {
+    console.error('Error fetching genres:', error);
+    throw error;
+  }
+};
+
+export const addGenre = async (genreData: { name: string; description?: string }) => {
+  try {
+    const newGenre: Genre = {
+      id: (genres.length + 1).toString(),
+      name: genreData.name,
+      description: genreData.description
+    };
+    
+    genres.push(newGenre);
+    return newGenre;
+  } catch (error) {
+    console.error('Error adding genre:', error);
+    throw error;
+  }
+};
+
+export const updateGenre = async (genreId: string, genreData: { name: string; description?: string }) => {
+  try {
+    const genreIndex = genres.findIndex(genre => genre.id === genreId);
+    if (genreIndex !== -1) {
+      genres[genreIndex] = { ...genres[genreIndex], ...genreData };
+      return genres[genreIndex];
+    }
+    throw new Error('Genre not found');
+  } catch (error) {
+    console.error('Error updating genre:', error);
+    throw error;
+  }
+};
+
+export const deleteGenre = async (genreId: string) => {
+  try {
+    const genreIndex = genres.findIndex(genre => genre.id === genreId);
+    if (genreIndex !== -1) {
+      genres.splice(genreIndex, 1);
+      return { success: true };
+    }
+    throw new Error('Genre not found');
+  } catch (error) {
+    console.error('Error deleting genre:', error);
+    throw error;
+  }
+};
+
+// Book return management APIs
+export const fetchBorrowedBooksForReturn = async () => {
+  try {
+    return borrowedBooksForReturn.filter(book => !book.returned);
+  } catch (error) {
+    console.error('Error fetching borrowed books for return:', error);
+    throw error;
+  }
+};
+
+export const returnBook = async (borrowId: string) => {
+  try {
+    const borrowIndex = borrowedBooksForReturn.findIndex(borrow => borrow.id === borrowId);
+    if (borrowIndex !== -1) {
+      const borrow = borrowedBooksForReturn[borrowIndex];
+      const today = new Date();
+      const returnDate = new Date(borrow.returnDate);
+      
+      // Calculate fine if returned late (₹2 per day)
+      let fine = 0;
+      if (today > returnDate) {
+        const daysLate = Math.ceil((today.getTime() - returnDate.getTime()) / (1000 * 60 * 60 * 24));
+        fine = daysLate * 2;
+      }
+      
+      borrowedBooksForReturn[borrowIndex] = {
+        ...borrow,
+        returned: true,
+        actualReturnDate: today.toISOString().split('T')[0],
+        fine: fine
+      };
+      
+      // Increase available quantity
+      const bookIndex = booksInventory.findIndex(book => book.id === borrow.bookId);
+      if (bookIndex !== -1) {
+        booksInventory[bookIndex].availableQuantity++;
+      }
+      
+      return borrowedBooksForReturn[borrowIndex];
+    }
+    throw new Error('Borrowed book not found');
+  } catch (error) {
+    console.error('Error returning book:', error);
     throw error;
   }
 };

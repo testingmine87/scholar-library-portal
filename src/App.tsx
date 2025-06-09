@@ -14,6 +14,9 @@ import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import BookManagement from "./pages/BookManagement";
 import BorrowRequests from "./pages/BorrowRequests";
+import UserManagement from "./pages/UserManagement";
+import GenreManagement from "./pages/GenreManagement";
+import BookReturns from "./pages/BookReturns";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 
@@ -121,11 +124,41 @@ const AppRoutes = () => {
         } 
       />
       <Route 
+        path="/genre-management" 
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
+              <GenreManagement />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/user-management" 
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
+              <UserManagement />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/borrow-requests" 
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
               <BorrowRequests />
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/book-returns" 
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['librarian', 'admin']}>
+              <BookReturns />
             </RoleProtectedRoute>
           </ProtectedRoute>
         } 

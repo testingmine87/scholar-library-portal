@@ -15,6 +15,7 @@ const ProfileForm = () => {
     name: user?.name || "",
     email: user?.email || "",
     department: user?.department || "",
+    studentId: user?.studentId || "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -27,6 +28,7 @@ const ProfileForm = () => {
         name: user.name,
         email: user.email,
         department: user.department,
+        studentId: user.studentId || "",
       });
     }
   }, [user]);
@@ -76,6 +78,12 @@ const ProfileForm = () => {
               <Label>Department</Label>
               <Skeleton className="h-9 w-full" />
             </div>
+            {user?.role === 'student' && (
+              <div className="space-y-2">
+                <Label>Student ID</Label>
+                <Skeleton className="h-9 w-full" />
+              </div>
+            )}
             <div className="space-y-2">
               <Label>Member Since</Label>
               <Skeleton className="h-9 w-full" />
@@ -129,6 +137,21 @@ const ProfileForm = () => {
               className="dark:bg-gray-800"
             />
           </div>
+          
+          {user?.role === 'student' && (
+            <div className="space-y-2">
+              <Label htmlFor="studentId">Student ID</Label>
+              <Input
+                id="studentId"
+                name="studentId"
+                value={formData.studentId}
+                onChange={handleChange}
+                disabled={!isEditing || isSaving}
+                className="dark:bg-gray-800"
+                placeholder="Enter your student ID"
+              />
+            </div>
+          )}
           
           <div className="space-y-2">
             <Label>Member Since</Label>

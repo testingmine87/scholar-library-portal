@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { 
@@ -11,7 +10,10 @@ import {
   X,
   LogOut,
   Plus,
-  FileText
+  FileText,
+  Users,
+  RotateCcw,
+  List
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,7 +48,20 @@ const MainLayout = ({ children }: SidebarProps) => {
   // Librarian/Admin specific items
   const librarianNavItems = [
     { path: "/book-management", label: "Manage Books", icon: <Plus className="h-5 w-5" /> },
+    { path: "/genre-management", label: "Manage Genres", icon: <List className="h-5 w-5" /> },
     { path: "/borrow-requests", label: "Borrow Requests", icon: <FileText className="h-5 w-5" /> },
+    { path: "/book-returns", label: "Book Returns", icon: <RotateCcw className="h-5 w-5" /> },
+    { path: "/profile", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
+    { path: "/notifications", label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
+  ];
+
+  // Admin specific items (includes user management)
+  const adminNavItems = [
+    { path: "/book-management", label: "Manage Books", icon: <Plus className="h-5 w-5" /> },
+    { path: "/genre-management", label: "Manage Genres", icon: <List className="h-5 w-5" /> },
+    { path: "/user-management", label: "Manage Users", icon: <Users className="h-5 w-5" /> },
+    { path: "/borrow-requests", label: "Borrow Requests", icon: <FileText className="h-5 w-5" /> },
+    { path: "/book-returns", label: "Book Returns", icon: <RotateCcw className="h-5 w-5" /> },
     { path: "/profile", label: "Profile", icon: <UserRound className="h-5 w-5" /> },
     { path: "/notifications", label: "Notifications", icon: <BellRing className="h-5 w-5" /> },
   ];
@@ -57,8 +72,12 @@ const MainLayout = ({ children }: SidebarProps) => {
     
     if (user.role === 'guest') {
       return baseNavItems;
-    } else if (user.role === 'librarian' || user.role === 'admin') {
-      return [...baseNavItems, ...librarianNavItems];
+    } else if (user.role === 'admin') {
+      return [...baseNavItems, ...adminNavItems];
+    } else if (user.role === 'librarian') {
+      return [...baseNavItems, ...librarianNavItems, 
+        { path: "/user-management", label: "Manage Students", icon: <Users className="h-5 w-5" /> }
+      ];
     } else {
       return [...baseNavItems, ...userNavItems];
     }

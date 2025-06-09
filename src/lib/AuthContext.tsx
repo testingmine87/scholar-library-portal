@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-// import { fetchUserProfile } from './api';
 
 export type UserRole = 'student' | 'librarian' | 'admin' | 'faculty' | 'guest';
 
@@ -10,6 +9,7 @@ interface UserData {
   role: UserRole;
   department: string;
   memberSince: string;
+  studentId?: string;
 }
 
 interface AuthContextType {
@@ -31,7 +31,8 @@ const dummyUsers: Record<string, UserData> = {
     email: 'student@test.com',
     role: 'student',
     department: 'Computer Science',
-    memberSince: 'September 2023'
+    memberSince: 'September 2023',
+    studentId: 'CS2023001'
   },
   'librarian@test.com': {
     id: '2',

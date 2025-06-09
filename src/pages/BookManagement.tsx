@@ -18,6 +18,7 @@ type Book = {
   title: string;
   author: string;
   genre: string;
+  isbn: string;
   totalQuantity: number;
   availableQuantity: number;
   available: boolean;
@@ -29,6 +30,7 @@ const BookManagement = () => {
     title: '',
     author: '',
     genre: '',
+    isbn: '',
     quantity: 1
   });
   const [editingBook, setEditingBook] = useState<{ id: string; quantity: number } | null>(null);
@@ -47,7 +49,7 @@ const BookManagement = () => {
     onSuccess: () => {
       toast.success("Book added successfully!");
       queryClient.invalidateQueries({ queryKey: ['books'] });
-      setNewBook({ title: '', author: '', genre: '', quantity: 1 });
+      setNewBook({ title: '', author: '', genre: '', isbn: '', quantity: 1 });
       setIsAddDialogOpen(false);
     },
     onError: () => {
@@ -71,7 +73,7 @@ const BookManagement = () => {
 
   const handleAddBook = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newBook.title || !newBook.author || !newBook.genre) {
+    if (!newBook.title || !newBook.author || !newBook.genre || !newBook.isbn) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -145,6 +147,16 @@ const BookManagement = () => {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="isbn">ISBN</Label>
+                  <Input
+                    id="isbn"
+                    value={newBook.isbn}
+                    onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
+                    placeholder="Enter ISBN (e.g., 978-0262033848)"
+                    required
+                  />
+                </div>
+                <div>
                   <Label htmlFor="genre">Genre</Label>
                   <Select value={newBook.genre} onValueChange={(value) => setNewBook({ ...newBook, genre: value })}>
                     <SelectTrigger>
@@ -207,6 +219,7 @@ const BookManagement = () => {
                     </Badge>
                   </div>
                   <div className="text-sm text-gray-600">
+                    <p>ISBN: {book.isbn}</p>
                     <p>Total Quantity: {book.totalQuantity}</p>
                     <p>Available: {book.availableQuantity}</p>
                     <p>Borrowed: {book.totalQuantity - book.availableQuantity}</p>
