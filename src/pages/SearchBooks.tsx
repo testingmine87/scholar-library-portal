@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import MainLayout from "@/components/MainLayout";
@@ -40,7 +39,7 @@ const SearchBooks = () => {
 
   const borrowRequestMutation = useMutation({
     mutationFn: ({ bookId, bookTitle }: { bookId: string; bookTitle: string }) => 
-      createBorrowRequest(bookId, user?.id || '', user?.name || '', bookTitle),
+      createBorrowRequest(bookId, user?.id || '', user?.name || '', bookTitle, user?.role || 'student'),
     onSuccess: () => {
       toast.success("Borrow request submitted successfully!");
       queryClient.invalidateQueries({ queryKey: ['borrow-requests'] });
