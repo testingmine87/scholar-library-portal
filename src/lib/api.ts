@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// Import UserRole type from AuthContext
+import { UserRole } from './AuthContext';
+
 // Create axios instance with base URL for our dummy API
 export const api = axios.create({
   baseURL: 'http://localhost:5000',
@@ -604,7 +607,7 @@ export const updateUserProfile = async (userId: string, userData: Partial<User>)
 export const createUser = async (userData: {
   name: string;
   email: string;
-  role: 'student' | 'faculty' | 'guest';
+  role: UserRole;
   department: string;
   studentId?: string;
 }) => {
