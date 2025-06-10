@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Edit, User, Plus, UserX, UserCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useAuth } from "@/lib/AuthContext";
+import { useAuth, UserRole } from "@/lib/AuthContext";
 
 type User = {
   id: string;
@@ -39,7 +39,7 @@ const UserManagement = () => {
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
-    role: "student" as User['role'],
+    role: "student" as UserRole,
     department: "",
     studentId: ""
   });
@@ -293,7 +293,7 @@ const UserManagement = () => {
                 <Label htmlFor="createRole">Role</Label>
                 <Select 
                   value={newUser.role} 
-                  onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as User['role'] }))}
+                  onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value as UserRole }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -394,7 +394,7 @@ const UserManagement = () => {
                     <Select 
                       value={editingUser.role} 
                       onValueChange={(value) => setEditingUser(prev => 
-                        prev ? { ...prev, role: value as User['role'] } : null
+                        prev ? { ...prev, role: value as UserRole } : null
                       )}
                     >
                       <SelectTrigger>
